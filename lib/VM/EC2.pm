@@ -7127,6 +7127,17 @@ sub resume_processes {
     return $self->asg_call('ResumeProcesses', @params);
 }
 
+
+=head1 RDS
+
+=cut
+
+sub describe_db_instances {
+    my ($self, %args) = @_;
+    return $self->rds_call('DescribeDBInstances');
+}
+
+
 # ------------------------------------------------------------------------------------------
 
 =head1 INTERNAL METHODS
@@ -7587,6 +7598,15 @@ sub asg_call {
     (my $endpoint = $self->{endpoint}) =~ s/ec2/autoscaling/;
     local $self->{endpoint} = $endpoint;
     local $self->{version}  = '2011-01-01';
+    $self->call(@_);
+}
+
+sub rds_call {
+    my $self = shift;
+    (my $endpoint = $self->{endpoint}) =~ s/ec2/rds/;
+    $endpoint =~ s/http:/https:/;
+    local $self->{endpoint} = $endpoint;
+    local $self->{version}  = '2013-01-10';
     $self->call(@_);
 }
 
