@@ -25,6 +25,7 @@ most common functions are available.
 Implemented:
  CreateAutoScalingGroup
  CreateLaunchConfiguration
+ CreateOrUpdateTags
  DeleteAutoScalingGroup
  DeleteLaunchConfiguration
  DeletePolicy
@@ -38,7 +39,6 @@ Implemented:
  UpdateAutoScalingGroup
 
 Unimplemented:
- CreateOrUpdateTags
  DeleteNotificationConfiguration
  DeleteScheduledAction
  DeleteTags
@@ -467,6 +467,40 @@ sub execute_policy {
         qw( AutoScalingGroupName HonorCooldown PolicyName );
 
     return $self->asg_call('ExecutePolicy', @params);
+}
+
+
+=head2 $success = $ec2->create_or_update_tags(-tags => @tags)
+
+Creates new tags or updates existing ones.
+
+Required parameters:
+
+  -tags   List of tags. Each tag must have the following structure:
+    {
+        Key => string between 0 and 128 chars
+        Value => string between 0 and 256 chars
+        PropagateAtLaunch => boolean
+        ResourceId => name of the autoscaling group which this tag applies to
+    }
+
+Returns true on success
+
+=cut
+
+sub create_or_update_tags {
+    my ($self, @tags) = @_;
+
+    use Data::Dump;
+    dd @tags;
+
+    # Currently this is the only resource type supported
+    @tags = map { $_->{ResourceType} = 'auto-scaling-group'; $_ } @tags;
+    my @params = $self->autoscaling_tags('Tags', { -tags => \@tags });
+
+    dd @params;
+
+    return $self->asg_call('CreateOrUpdateTags', @params);
 }
 
 =head1 SEE ALSO
